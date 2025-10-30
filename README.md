@@ -4,8 +4,8 @@
 
 Bank Statement Viewer — Go + React/Next.js
 
-[![Go](https://img.shields.io/badge/Go-1.22+-00ADD8?logo=go&logoColor=white)](https://go.dev)
-[![Node](https://img.shields.io/badge/Node-18+-339933?logo=node.js&logoColor=white)](https://nodejs.org)
+[![Go](https://img.shields.io/badge/Go-1.23+-00ADD8?logo=go&logoColor=white)](https://go.dev)
+[![Node](https://img.shields.io/badge/Node-20+-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![License](https://img.shields.io/badge/License-MIT-purple.svg)](#)
 [![Timebox](https://img.shields.io/badge/Timebox-4–6h-blue)](#)
 
@@ -157,20 +157,13 @@ Intelligent page number display with ellipsis patterns
 
 **Try them out:** Visit `/demo` after starting the app!
 
-**Documentation:**
-- [Alert & Notification Guide](./frontend/ALERT_NOTIFICATION_GUIDE.md)
-- [Pagination Guide](./frontend/PAGINATION_GUIDE.md)
-- [Component Showcase](./frontend/COMPONENT_SHOWCASE.md)
-- [Quick Start Guide](./frontend/NEW_COMPONENTS.md)
-
 ---
 
 ### 📖 Documentation
 
 | Type | Document | Description |
 |------|----------|-------------|
-| ⚡ Quick Start | [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) | All commands in one place |
-| 🚀 Deployment | [DEPLOYMENT.md](./DEPLOYMENT.md) | Complete deployment guide |
+| 🚀 Deployment | [DEPLOYMENT.md](./docs/DEPLOYMENT.md) | Complete deployment guide |
 | 🛠️ Setup | [setup-gcp.sh](./setup-gcp.sh) | Automated GCP setup script |
 
 ---

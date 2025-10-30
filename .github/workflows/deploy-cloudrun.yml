@@ -28,7 +28,7 @@ env:
 jobs:
   # Detect which files changed
   changes:
-    name: Detect Changes
+    name: Trigger
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
     outputs:
@@ -136,11 +136,10 @@ jobs:
   deploy-frontend:
     name: Deploy Frontend
     runs-on: ubuntu-latest
-    needs: [changes, deploy-backend]
+    needs: [changes]
     if: |
       always() &&
       (needs.changes.result == 'skipped' || needs.changes.result == 'success') &&
-      (needs.deploy-backend.result == 'success' || needs.deploy-backend.result == 'skipped') &&
       (
         (github.event_name == 'workflow_dispatch' && (github.event.inputs.target == 'frontend' || github.event.inputs.target == 'all')) ||
         (github.event_name == 'push' && needs.changes.outputs.frontend == 'true')
