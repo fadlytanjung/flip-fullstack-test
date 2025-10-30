@@ -106,7 +106,7 @@ jobs:
             --min-instances 0 \
             --max-instances 10 \
             --timeout 300 \
-            --set-env-vars "ENV=production,PORT=8080" \
+            --set-env-vars "ENV=production" \
             --labels "app=flip-fullstack-test,tier=backend,managed-by=github-actions"
 
       - name: Get Backend Service URL
