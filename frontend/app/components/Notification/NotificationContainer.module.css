@@ -1,0 +1,59 @@
+.container {
+  position: fixed;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  pointer-events: none;
+}
+
+.container > * {
+  pointer-events: auto;
+}
+
+/* Positions */
+.top-right {
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
+}
+
+.top-left {
+  top: var(--spacing-lg);
+  left: var(--spacing-lg);
+}
+
+.bottom-right {
+  bottom: var(--spacing-lg);
+  right: var(--spacing-lg);
+}
+
+.bottom-left {
+  bottom: var(--spacing-lg);
+  left: var(--spacing-lg);
+}
+
+.top-center {
+  top: var(--spacing-lg);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.bottom-center {
+  bottom: var(--spacing-lg);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+@media (max-width: 768px) {
+  .container {
+    left: var(--spacing-md);
+    right: var(--spacing-md);
+  }
+  
+  .top-center,
+  .bottom-center {
+    transform: none;
+    left: var(--spacing-md);
+  }
+}
+

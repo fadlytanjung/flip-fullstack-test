@@ -1,0 +1,2 @@
+export { ComponentDemo } from './ComponentDemo';
+

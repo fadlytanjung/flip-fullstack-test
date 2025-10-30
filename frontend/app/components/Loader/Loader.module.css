@@ -1,0 +1,46 @@
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  color: var(--color-primary);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.small {
+  gap: var(--spacing-sm);
+}
+
+.small .text {
+  font-size: 14px;
+}
+
+.medium .text {
+  font-size: 16px;
+}
+
+.large {
+  gap: var(--spacing-lg);
+}
+
+.large .text {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.text {
+  color: var(--color-text);
+}
+

@@ -1,0 +1,2 @@
+export { Dropzone } from './Dropzone';
+

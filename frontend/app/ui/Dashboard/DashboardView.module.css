@@ -1,0 +1,167 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.statCard {
+  background: var(--color-background);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.statIcon {
+  width: 64px;
+  height: 64px;
+  background: var(--color-primary-light);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-primary);
+}
+
+.uploadContainer {
+  background: var(--color-background);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-md);
+}
+
+.statContent {
+  flex: 1;
+  overflow: hidden;
+}
+
+.statLabel {
+  font-size: 14px;
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-xs);
+}
+
+.statValue {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Table cell styles */
+.dateCell {
+  color: var(--color-text-light);
+  font-size: 13px;
+}
+
+.nameCell {
+  font-weight: 500;
+  color: var(--color-secondary);
+}
+
+.typeBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.badgeCredit {
+  background: rgba(76, 175, 80, 0.1);
+  color: var(--color-success);
+}
+
+.badgeDebit {
+  background: rgba(102, 102, 102, 0.1);
+  color: var(--color-text);
+}
+
+.amountCell {
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.amountCredit {
+  color: var(--color-success);
+}
+
+.amountDebit {
+  color: var(--color-text);
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.statusSuccess {
+  background: rgba(76, 175, 80, 0.1);
+  color: var(--color-success);
+}
+
+.statusFailed {
+  background: rgba(244, 67, 54, 0.1);
+  color: var(--color-failed);
+}
+
+.statusPending {
+  background: rgba(255, 152, 0, 0.1);
+  color: var(--color-pending);
+}
+
+.descriptionCell {
+  color: var(--color-text-light);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statCard {
+    padding: var(--spacing-lg);
+  }
+
+  .statIcon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .statValue {
+    font-size: 22px;
+  }
+
+  .descriptionCell {
+    max-width: 100px;
+  }
+}
+

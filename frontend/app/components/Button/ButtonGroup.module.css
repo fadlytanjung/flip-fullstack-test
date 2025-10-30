@@ -1,0 +1,47 @@
+.buttonGroup {
+  display: flex;
+}
+
+/* Orientation */
+.horizontal {
+  flex-direction: row;
+}
+
+.vertical {
+  flex-direction: column;
+}
+
+/* Gap sizes */
+.gap-small {
+  gap: var(--spacing-sm);
+}
+
+.gap-medium {
+  gap: var(--spacing-md);
+}
+
+.gap-large {
+  gap: var(--spacing-lg);
+}
+
+/* Alignment */
+.align-start {
+  align-items: flex-start;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.align-end {
+  align-items: flex-end;
+}
+
+.align-stretch {
+  align-items: stretch;
+}
+
+.align-stretch > * {
+  width: 100%;
+}
+

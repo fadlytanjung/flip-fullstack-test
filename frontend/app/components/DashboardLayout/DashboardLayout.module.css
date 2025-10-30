@@ -1,0 +1,38 @@
+.dashboardLayout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-surface);
+}
+
+.mainContent {
+  margin-left: var(--sidebar-width);
+  transition: all var(--transition-normal);
+  min-height: 100vh;
+}
+
+.contentWrapper {
+  padding: var(--spacing-xl);
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+@media (max-width: 1024px) {
+  .mainContent {
+    margin-left: var(--sidebar-collapsed-width);
+  }
+
+  .contentWrapper {
+    padding: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 768px) {
+  .mainContent {
+    margin-left: 0;
+  }
+
+  .contentWrapper {
+    padding: var(--spacing-md);
+  }
+}
+

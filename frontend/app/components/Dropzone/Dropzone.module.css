@@ -1,0 +1,159 @@
+.dropzone {
+  width: 100%;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.dropArea {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  background: var(--color-surface);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropArea:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.dropArea.dragging {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  border-style: solid;
+  transform: scale(1.01);
+}
+
+.dropArea.hasFile {
+  border-style: solid;
+  border-color: var(--color-success);
+  background: rgba(76, 175, 80, 0.05);
+  cursor: default;
+}
+
+.dropArea.hasFile:hover {
+  background: rgba(76, 175, 80, 0.05);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-align: center;
+  width: 100%;
+}
+
+.uploadIcon {
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--color-text-light);
+  margin: 0;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--color-text-light);
+  margin: 0;
+}
+
+.filePreview {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  width: 100%;
+  max-width: 500px;
+}
+
+.fileIcon {
+  color: var(--color-success);
+  flex-shrink: 0;
+}
+
+.fileInfo {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.fileName {
+  font-weight: 500;
+  color: var(--color-text);
+  margin: 0 0 var(--spacing-xs) 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.fileSize {
+  font-size: 12px;
+  color: var(--color-text-light);
+  margin: 0;
+}
+
+.removeButton {
+  background: var(--color-error);
+  color: var(--color-text-white);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.removeButton:hover {
+  background: #d32f2f;
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .dropArea {
+    padding: var(--spacing-lg);
+    min-height: 120px;
+  }
+
+  .filePreview {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .fileInfo {
+    text-align: center;
+  }
+
+  .fileName {
+    white-space: normal;
+    word-break: break-word;
+  }
+}
+
