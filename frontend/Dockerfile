@@ -22,6 +22,10 @@ WORKDIR /app
 
 ENV IS_DOCKER=true
 
+# Build arguments
+ARG NEXT_PUBLIC_API_URL=http://localhost:9000/api
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
@@ -43,6 +47,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
+
+# Accept runtime environment variable (can be overridden by Cloud Run)
+ARG NEXT_PUBLIC_API_URL=http://localhost:9000/api
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001

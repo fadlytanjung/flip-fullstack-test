@@ -24,6 +24,8 @@ env:
   REGION: ${{ secrets.GCP_REGION }}
   REGISTRY: ${{ secrets.GCP_REGION }}-docker.pkg.dev
   REPOSITORY: flip-fullstack-test
+  # Backend API URL - set via GitHub secret
+  NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
 
 jobs:
   # Detect which files changed
@@ -100,7 +102,7 @@ jobs:
             --platform managed \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
-            --port 8080 \
+            --port 9000 \
             --memory 512Mi \
             --cpu 1 \
             --min-instances 0 \
@@ -168,7 +170,7 @@ jobs:
           docker build \
             --tag ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/flip-fullstack-test-frontend:${{ github.sha }} \
             --tag ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/flip-fullstack-test-frontend:latest \
-            --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }} \
+            --build-arg NEXT_PUBLIC_API_URL=${{ env.NEXT_PUBLIC_API_URL }} \
             ./frontend
 
       - name: Push Frontend Docker image
@@ -189,7 +191,7 @@ jobs:
             --min-instances 0 \
             --max-instances 10 \
             --timeout 300 \
-            --set-env-vars "NODE_ENV=production,NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" \
+            --set-env-vars "NODE_ENV=production,NEXT_PUBLIC_API_URL=${{ env.NEXT_PUBLIC_API_URL }}" \
             --labels "app=flip-fullstack-test,tier=frontend,managed-by=github-actions"
 
       - name: Get Frontend Service URL

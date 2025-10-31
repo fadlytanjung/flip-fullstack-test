@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { Upload, FileText, X } from 'lucide-react';
+import { useState, useRef, forwardRef, useImperativeHandle } from 'react';
+import { Upload, FileText, X, Loader2 } from 'lucide-react';
 import styles from './Dropzone.module.css';
 
 interface DropzoneProps {
@@ -9,21 +9,39 @@ interface DropzoneProps {
   accept?: string;
   title?: string;
   subtitle?: string;
+  disabled?: boolean;
+  loading?: boolean;
 }
 
-export function Dropzone({
+export interface DropzoneRef {
+  reset: () => void;
+}
+
+export const Dropzone = forwardRef<DropzoneRef, DropzoneProps>(({
   onFileSelect,
   accept = '.csv',
   title = 'Upload File',
-  subtitle = 'Click or drag and drop'
-}: DropzoneProps) {
+  subtitle = 'Click or drag and drop',
+  disabled = false,
+  loading = false
+}, ref) => {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Expose reset method to parent
+  useImperativeHandle(ref, () => ({
+    reset: () => {
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  }), []);
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    setIsDragging(true);
+    if (!disabled) setIsDragging(true);
   };
 
   const handleDragLeave = () => {
@@ -34,6 +52,8 @@ export function Dropzone({
     e.preventDefault();
     setIsDragging(false);
 
+    if (disabled) return;
+
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       handleFileSelect(files[0]);
@@ -41,7 +61,7 @@ export function Dropzone({
   };
 
   const handleClick = () => {
-    fileInputRef.current?.click();
+    if (!disabled) fileInputRef.current?.click();
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,6 +72,8 @@ export function Dropzone({
   };
 
   const handleFileSelect = (file: File) => {
+    if (disabled) return;
+
     const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
     const acceptedExtensions = accept.split(',').map(ext => ext.trim().toLowerCase());
 
@@ -89,23 +111,29 @@ export function Dropzone({
         accept={accept}
         onChange={handleFileInputChange}
         className={styles.hiddenInput}
+        disabled={disabled}
       />
       
       <div
-        className={`${styles.dropArea} ${isDragging ? styles.dragging : ''} ${selectedFile ? styles.hasFile : ''}`}
+        className={`${styles.dropArea} ${isDragging ? styles.dragging : ''} ${selectedFile ? styles.hasFile : ''} ${disabled ? styles.disabled : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={!selectedFile ? handleClick : undefined}
       >
-        {!selectedFile ? (
+        {loading ? (
+          <div className={styles.loadingOverlay}>
+            <Loader2 className={styles.loadingSpinner} size={48} />
+            <p className={styles.loadingText}>Uploading...</p>
+          </div>
+        ) : !selectedFile ? (
           <div className={styles.emptyState}>
             <Upload className={styles.uploadIcon} size={32} />
             <div className={styles.text}>
               <p className={styles.title}>{title}</p>
               <p className={styles.subtitle}>{subtitle}</p>
             </div>
-            <p className={styles.hint}>{accept.replace(/\./g, '').toUpperCase()} only</p>
+              <p className={styles.hint}>{disabled ? 'Uploading...' : accept.replace(/\./g, '').toUpperCase() + ' only'}</p>
           </div>
         ) : (
           <div className={styles.filePreview}>
@@ -119,6 +147,7 @@ export function Dropzone({
               onClick={handleRemoveFile}
               type="button"
               aria-label="Remove file"
+                  disabled={disabled}
             >
               <X size={18} />
             </button>
@@ -127,5 +156,7 @@ export function Dropzone({
       </div>
     </div>
   );
-}
+});
+
+Dropzone.displayName = 'Dropzone';
 

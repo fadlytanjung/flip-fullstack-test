@@ -42,6 +42,49 @@
   background: rgba(76, 175, 80, 0.05);
 }
 
+.dropArea.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  border-color: var(--color-border-light);
+  background: var(--color-surface);
+}
+
+.dropArea.disabled:hover {
+  border-color: var(--color-border-light);
+  background: var(--color-surface);
+}
+
+.loadingOverlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  width: 100%;
+  height: 100%;
+}
+
+.loadingSpinner {
+  color: var(--color-primary);
+  animation: spin 1s linear infinite;
+}
+
+.loadingText {
+  font-size: 14px;
+  color: var(--color-primary);
+  font-weight: 500;
+  margin: 0;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .emptyState {
   display: flex;
   flex-direction: column;

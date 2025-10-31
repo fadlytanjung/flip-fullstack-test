@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { ArrowUpDown } from 'lucide-react';
+import { MoveUp, MoveDown, ArrowUpDown, InboxIcon } from 'lucide-react';
 import styles from './Table.module.css';
 
 export interface TableColumn<T = any> {
@@ -16,8 +16,8 @@ interface TableProps<T = any> {
   loading?: boolean;
   emptyMessage?: string;
   onSort?: (key: string) => void;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: string | null;
+  sortOrder?: 'asc' | 'desc' | null;
 }
 
 export function Table<T extends Record<string, any>>({
@@ -36,6 +36,18 @@ export function Table<T extends Record<string, any>>({
     }
   };
 
+  const getSortIcon = (columnKey: string) => {
+    if (sortBy !== columnKey || sortOrder === null) {
+      return <ArrowUpDown size={16} className={styles.sortIconDefault} />;
+    }
+
+    if (sortOrder === 'asc') {
+      return <MoveUp size={16} className={styles.sortIconAsc} />;
+    }
+
+    return <MoveDown size={16} className={styles.sortIconDesc} />;
+  };
+
   return (
     <div className={styles.tableWrapper}>
       <table className={styles.table}>
@@ -50,11 +62,10 @@ export function Table<T extends Record<string, any>>({
               >
                 <span className={styles.headerContent}>
                   {column.header}
-                  {column.sortable && sortBy === column.key && (
-                    <ArrowUpDown 
-                      size={14} 
-                      className={`${styles.sortIcon} ${sortOrder === 'desc' ? styles.desc : ''}`} 
-                    />
+                  {column.sortable && (
+                    <div className={`${styles.sortIconWrapper} ${sortBy === column.key ? styles.active : ''}`}>
+                      {getSortIcon(column.key)}
+                    </div>
                   )}
                 </span>
               </th>
@@ -70,8 +81,11 @@ export function Table<T extends Record<string, any>>({
             </tr>
           ) : data.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className={styles.empty}>
-                {emptyMessage}
+                <td colSpan={columns.length} className={styles.emptyCell}>
+                  <div className={styles.emptyState}>
+                    <InboxIcon className={styles.emptyIcon} size={48} />
+                    <p className={styles.emptyMessage}>{emptyMessage}</p>
+                  </div>
               </td>
             </tr>
           ) : (

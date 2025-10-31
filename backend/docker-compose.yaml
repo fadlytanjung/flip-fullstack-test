@@ -1,0 +1,15 @@
+services:
+    flip-fullstack-test-backend:
+        restart: always
+        container_name: flip-fullstack-test-backend
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                BUILD_ENV: production
+        env_file:
+            - .env
+        expose:
+            - "9001"
+        ports:
+            - "9001:9001"

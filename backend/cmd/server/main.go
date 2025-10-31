@@ -1,28 +1,32 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
 	"os"
-)
 
-func healthHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, `{"status":"healthy","service":"flip-fullstack-test-backend"}`)
-}
+	"github.com/fadlytanjung/flip-fullstack-test/backend/pkg/db"
+	"github.com/gofiber/fiber/v2"
+)
 
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "9000"
 	}
 
-	http.HandleFunc("/health", healthHandler)
-	
+	// Initialize database
+	database := db.New("transactions.db")
+	defer database.Close()
+
+	// Create Fiber app
+	app := fiber.New()
+
+	// Bootstrap all routes and dependencies
+	Bootstrap(app, database)
+
+	// Start server
 	log.Printf("Server starting on port %s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	if err := app.Listen(":" + port); err != nil {
 		log.Fatal(err)
 	}
 }

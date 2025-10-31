@@ -1,134 +1,110 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Wallet, BarChart3, AlertTriangle, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
-import { 
-  DashboardLayout, 
-  Dropzone, 
-  DataTableCompound,
-  TableColumn,
+import {
+  DataTable,
+  Dropzone,
+  DashboardLayout,
   CardSkeleton,
-  Alert 
 } from '@/app/components';
 import { useNotification } from '@/app/contexts';
-import { Transaction, mockApiCall, ApiResponse } from './mockApi';
+import { useTable, useLoading } from '../hooks';
+import { uploadFile, fetchBalance, ApiError, UploadResponse, fetchIssuesCount } from './api';
 import styles from './DashboardView.module.css';
+import type { DropzoneRef } from '@/app/components/Dropzone/Dropzone';
 
 export function DashboardView() {
   const { showSuccess, showError, showWarning } = useNotification();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(10);
-  const [sortBy, setSortBy] = useState<string>('timestamp');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [apiResponse, setApiResponse] = useState<ApiResponse<Transaction> | null>(null);
-  const [uploadError, setUploadError] = useState<string | null>(null);
+  const table = useTable({ perPage: 10 });
+  const loading = useLoading();
+  const dropzoneRef = useRef<DropzoneRef>(null);
 
-  // Fetch data function (simulates server-side call)
-  const fetchTransactions = useCallback(async () => {
-    setLoading(true);
+  // Dashboard specific state
+  const [balance, setBalance] = useState<any>(null);
+  const [issuesCount, setIssuesCount] = useState(0);
+
+  // Fetch balance data
+  const fetchBalanceData = useCallback(async () => {
     try {
-      const response = await mockApiCall<Transaction>({
-        page: currentPage,
-        per_page: perPage,
-        search: searchQuery,
-        sort_by: sortBy,
-        order: sortOrder
-      });
-      
-      if ('data' in response) {
-        setApiResponse(response);
-        setTransactions(response.data);
-      }
+      const balanceData = await fetchBalance();
+      setBalance(balanceData);
     } catch (error) {
-      console.error('Failed to fetch transactions:', error);
-    } finally {
-      setLoading(false);
+      console.error('Failed to fetch balance:', error);
     }
-  }, [currentPage, perPage, searchQuery, sortBy, sortOrder]);
+  }, []);
 
+  // Fetch issues count
+  const fetchIssuesCountData = useCallback(async () => {
+    try {
+      const response = await fetchIssuesCount();
+      setIssuesCount(response);
+    } catch (error) {
+      console.error('Failed to fetch issues count:', error);
+    }
+  }, []);
+
+  // Initial data load
   useEffect(() => {
-    fetchTransactions();
-  }, [fetchTransactions]);
+    loading.setStatsLoading(true);
+    Promise.all([
+      (async () => {
+        await fetchBalanceData();
+      })(),
+      (async () => {
+        await fetchIssuesCountData();
+      })()
+    ]).then(() => {
+      loading.setStatsLoading(false);
+    });
+  }, [loading.setStatsLoading, fetchBalanceData, fetchIssuesCountData]);
 
   const handleFileUpload = async (file: File) => {
-    setUploadError(null);
-    
     // Validate file type
     if (!file.name.endsWith('.csv')) {
       const errorMsg = 'Invalid file type. Please upload a CSV file.';
-      setUploadError(errorMsg);
       showError(errorMsg, 'Upload Failed');
       return;
     }
 
     try {
-      // Simulate upload process
-      showWarning('Uploading file...', 'Processing');
+      loading.setUploading(true);
       
-      // TODO: Parse CSV and send to backend
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      showSuccess(`${file.name} uploaded successfully!`, 'Upload Complete');
-      setUploadError(null);
-      
-      // Refresh data after successful upload
-      fetchTransactions();
+      const response = await uploadFile(file);
+
+      if ('error' in response) {
+        const error = response as ApiError;
+        const errorMsg = error.message || 'Failed to upload file';
+        showError(errorMsg, 'Upload Failed');
+      } else {
+        const uploadResp = response as UploadResponse;
+
+        // Show detailed upload results
+        const successMsg = `${file.name} uploaded successfully!\n` +
+          `Total: ${uploadResp.total_records}, Success: ${uploadResp.success_records}, ` +
+          `Failed: ${uploadResp.failed_records}, Pending: ${uploadResp.pending_records}`;
+
+        showSuccess(successMsg, 'Upload Complete');
+
+        // Reset dropzone and refresh data after successful upload
+        dropzoneRef.current?.reset();
+        setTimeout(() => {
+          table.refreshData();
+          fetchBalanceData();
+          fetchIssuesCountData();
+        }, 500);
+      }
     } catch (error) {
       const errorMsg = 'Failed to upload file. Please try again.';
-      setUploadError(errorMsg);
       showError(errorMsg, 'Upload Failed');
+    } finally {
+      loading.setUploading(false);
     }
-  };
-
-  const handleSearch = (value: string) => {
-    setSearchQuery(value);
-    setCurrentPage(1); // Reset to first page on search
-  };
-
-  const handleSort = (key: string) => {
-    if (sortBy === key) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(key);
-      setSortOrder('asc');
-    }
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
   };
 
   // Calculate stats
   const calculateBalance = () => {
-    return transactions
-      .filter(t => t.status === 'SUCCESS')
-      .reduce((acc, t) => {
-        return t.type === 'CREDIT' ? acc + t.amount : acc - t.amount;
-      }, 0);
-  };
-
-  const issues = transactions.filter(t => t.status === 'FAILED' || t.status === 'PENDING');
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    return balance?.balance || 0;
   };
 
   const getStatusBadge = (status: string) => {
@@ -151,24 +127,24 @@ export function DashboardView() {
   };
 
   // Table columns definition
-  const columns: TableColumn<Transaction>[] = [
+  const columns = [
     {
       key: 'timestamp',
       header: 'Date',
       sortable: true,
-      render: (row: Transaction) => <span className={styles.dateCell}>{formatDate(row.timestamp)}</span>
+      render: (row: any) => <span className={styles.dateCell}>{table.formatDate(row.timestamp)}</span>
     },
     {
       key: 'name',
       header: 'Name',
       sortable: true,
-      render: (row: Transaction) => <span className={styles.nameCell}>{row.name}</span>
+      render: (row: any) => <span className={styles.nameCell}>{row.name}</span>
     },
     {
       key: 'type',
       header: 'Type',
       sortable: true,
-      render: (row: Transaction) => (
+      render: (row: any) => (
         <span className={`${styles.typeBadge} ${row.type === 'CREDIT' ? styles.badgeCredit : styles.badgeDebit}`}>
           {row.type}
         </span>
@@ -178,9 +154,9 @@ export function DashboardView() {
       key: 'amount',
       header: 'Amount',
       sortable: true,
-      render: (row: Transaction) => (
+      render: (row: any) => (
         <span className={`${styles.amountCell} ${row.type === 'CREDIT' ? styles.amountCredit : styles.amountDebit}`}>
-          {row.type === 'CREDIT' ? '+' : '-'}{formatCurrency(row.amount)}
+          {row.type === 'CREDIT' ? '+' : '-'}{table.formatCurrency(row.amount)}
         </span>
       )
     },
@@ -188,12 +164,12 @@ export function DashboardView() {
       key: 'status',
       header: 'Status',
       sortable: true,
-      render: (row: Transaction) => getStatusBadge(row.status)
+      render: (row: any) => getStatusBadge(row.status)
     },
     {
       key: 'description',
       header: 'Description',
-      render: (row: Transaction) => <span className={styles.descriptionCell}>{row.description}</span>
+      render: (row: any) => <span className={styles.descriptionCell}>{row.description}</span>
     }
   ];
 
@@ -202,7 +178,7 @@ export function DashboardView() {
       <div className={styles.dashboard}>
         {/* Stats Cards */}
         <div className={styles.statsGrid}>
-          {loading && !apiResponse ? (
+          {loading.statsLoading ? (
             <>
               <CardSkeleton />
               <CardSkeleton />
@@ -216,7 +192,7 @@ export function DashboardView() {
                 </div>
                 <div className={styles.statContent}>
                   <div className={styles.statLabel}>Current Balance</div>
-                  <div className={styles.statValue}>{formatCurrency(calculateBalance())}</div>
+                    <div className={styles.statValue}>{table.formatCurrency(calculateBalance())}</div>
                 </div>
               </div>
               <div className={styles.statCard}>
@@ -225,7 +201,7 @@ export function DashboardView() {
                 </div>
                 <div className={styles.statContent}>
                   <div className={styles.statLabel}>Total Transactions</div>
-                  <div className={styles.statValue}>{apiResponse?.meta.pagination.total || 0}</div>
+                    <div className={styles.statValue}>{table.apiResponse?.meta.pagination.total || 0}</div>
                 </div>
               </div>
               <div className={styles.statCard}>
@@ -234,7 +210,7 @@ export function DashboardView() {
                 </div>
                 <div className={styles.statContent}>
                   <div className={styles.statLabel}>Issues</div>
-                  <div className={styles.statValue}>{issues.length}</div>
+                    <div className={styles.statValue}>{issuesCount}</div>
                 </div>
               </div>
             </>
@@ -244,38 +220,35 @@ export function DashboardView() {
         {/* Upload Section */}
         <div className={styles.uploadContainer}>
           <Dropzone 
+            ref={dropzoneRef}
             onFileSelect={handleFileUpload}
             title="Upload Bank Statement"
             subtitle="Click or drag and drop your CSV file"
+            loading={loading.uploading}
           />
-          {uploadError && (
-            <div style={{ marginTop: 'var(--spacing-md)' }}>
-              <Alert 
-                type="error" 
-                message={uploadError}
-                dismissible
-                onClose={() => setUploadError(null)}
-              />
-            </div>
-          )}
         </div>
 
         {/* All Transactions Table */}
-        <DataTableCompound
+        <DataTable
           title="All Transactions"
-          subtitle={apiResponse ? `Showing ${apiResponse.meta.pagination.count} of ${apiResponse.meta.pagination.total} transactions` : undefined}
+          subtitle={table.apiResponse ? `Showing ${table.apiResponse.meta.pagination.count} of ${table.apiResponse.meta.pagination.total} transactions` : undefined}
           columns={columns}
-          data={transactions}
-          meta={apiResponse?.meta.pagination}
-          loading={loading}
-          searchValue={searchQuery}
-          onSearchChange={handleSearch}
-          onPageChange={handlePageChange}
-          onSort={handleSort}
-          sortBy={sortBy}
-          sortOrder={sortOrder}
+          data={table.transactions}
+          meta={table.apiResponse?.meta.pagination}
+          loading={table.loading}
+          searchValue={table.searchQuery}
+          onSearchChange={table.handleSearch}
+          onPageChange={table.handlePageChange}
+          onSort={table.handleSort}
+          sortBy={table.sortBy}
+          sortOrder={table.sortOrder}
           showSearch={true}
           showPagination={true}
+          emptyMessage="No transactions found. Upload a CSV file to get started."
+          filterType={table.filterType}
+          onFilterTypeChange={table.handleFilterType}
+          filterStatus={table.filterStatus}
+          onFilterStatusChange={table.handleFilterStatus}
         />
       </div>
     </DashboardLayout>

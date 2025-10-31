@@ -58,18 +58,71 @@ Go to: **Settings > Secrets and variables > Actions** and add:
 | `GCP_PROJECT_ID` | `flip-fullstack-test` | From setup script output |
 | `GCP_REGION` | `asia-southeast1` | From setup script output |
 | `GCP_SA_KEY` | `{...JSON...}` | Copy entire `github-actions-key.json` content |
+| `NEXT_PUBLIC_API_URL` | `https://backend-url.run.app` | Backend service URL after deployment |
 
 **Using GitHub CLI:**
 ```bash
 gh secret set GCP_PROJECT_ID -b "flip-fullstack-test"
 gh secret set GCP_REGION -b "asia-southeast1"
 gh secret set GCP_SA_KEY < github-actions-key.json
+gh secret set NEXT_PUBLIC_API_URL -b "https://flip-fullstack-test-backend-xxx.run.app"
 ```
 
 **⚠️ IMPORTANT:** Delete the key file after adding to GitHub:
 ```bash
 rm github-actions-key.json
 ```
+
+---
+
+## Environment Variables Configuration
+
+### Frontend Environment Variables
+
+The frontend has different configurations for development and production:
+
+**Development (Local):**
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:9000/api
+```
+
+**Production (Google Cloud Run):**
+```bash
+NEXT_PUBLIC_API_URL=https://flip-fullstack-test-backend-xxx.run.app/api
+```
+
+### How Environment Variables are Injected
+
+**1. Build Time (Docker Build):**
+```bash
+docker build \
+  --build-arg NEXT_PUBLIC_API_URL=https://your-backend-url.run.app \
+  ./frontend
+```
+
+**2. Runtime (Cloud Run):**
+```bash
+gcloud run deploy flip-fullstack-test-frontend \
+  --set-env-vars "NEXT_PUBLIC_API_URL=https://your-backend-url.run.app"
+```
+
+**3. GitHub Actions Workflow:**
+- Secrets are defined in GitHub: **Settings > Secrets and variables > Actions**
+- GitHub Actions passes them as environment variables to the workflow
+- Docker build uses these variables via build args
+- Cloud Run deployment also receives these as env vars
+
+### Backend Configuration
+
+The backend uses the following environment variables:
+
+**Production:**
+```bash
+ENV=production
+PORT=9000
+```
+
+These are set in the Cloud Run deployment configuration. See `.github/workflows/deploy-cloudrun.yml` for details.
 
 ---
 
@@ -97,20 +150,38 @@ Copy this URL (e.g., `https://flip-fullstack-test-backend-xxx.run.app`)
 
 ### Step 2: Configure Frontend with Backend URL
 
+⚠️ **IMPORTANT:** Set the backend URL as a GitHub secret **BEFORE** deploying the frontend:
+
 ```bash
 # Add backend URL to GitHub secrets
-gh secret set NEXT_PUBLIC_API_URL -b "https://your-backend-url.run.app"
+# This will be used by GitHub Actions during frontend build and deployment
+gh secret set NEXT_PUBLIC_API_URL -b "https://flip-fullstack-test-backend-xxx.run.app"
 
-# Or via GitHub UI: Add secret NEXT_PUBLIC_API_URL
+# Verify the secret is set
+gh secret list
 ```
+
+**Alternative: Via GitHub Web UI:**
+1. Go to: **Settings > Secrets and variables > Actions**
+2. Click **New repository secret**
+3. Name: `NEXT_PUBLIC_API_URL`
+4. Value: `https://flip-fullstack-test-backend-xxx.run.app` (your backend URL)
+5. Click **Add secret**
 
 ### Step 3: Deploy Frontend
 
 ```bash
+# Make sure frontend code is ready
 git add frontend/
 git commit -m "deploy: frontend to cloud run"
 git push origin main
 ```
+
+**GitHub Actions will:**
+1. Read `NEXT_PUBLIC_API_URL` from GitHub secrets
+2. Pass it to Docker build as `--build-arg NEXT_PUBLIC_API_URL=...`
+3. Include it in Cloud Run deployment environment variables
+4. Frontend can now reach backend at the production URL
 
 **Get frontend URL:**
 ```bash
@@ -215,6 +286,45 @@ gh run view RUN_ID --log
 
 ---
 
+## Updating Environment Variables
+
+### Update Frontend Backend URL
+
+If the backend URL changes, update the GitHub secret:
+
+```bash
+# Update the GitHub secret
+gh secret set NEXT_PUBLIC_API_URL -b "https://new-backend-url.run.app"
+
+# Trigger frontend redeployment
+git add frontend/
+git commit -m "chore: update backend URL"
+git push origin main
+
+# Or manually trigger via GitHub CLI
+gh workflow run deploy-cloudrun.yml -f target=frontend
+```
+
+### Update Cloud Run Directly (Manual)
+
+If you need to update environment variables without redeploying:
+
+```bash
+# Update frontend env var
+gcloud run services update flip-fullstack-test-frontend \
+  --region=asia-southeast1 \
+  --set-env-vars "NEXT_PUBLIC_API_URL=https://new-backend-url.run.app"
+
+# Update backend env var
+gcloud run services update flip-fullstack-test-backend \
+  --region=asia-southeast1 \
+  --set-env-vars "ENV=production"
+```
+
+**Note:** Manual updates bypass GitHub Actions. For consistency, prefer updating GitHub secrets and redeploying.
+
+---
+
 ## How It Works
 
 ### Architecture
@@ -255,7 +365,7 @@ Both services are configured with:
 - **Min instances:** 0 (scale to zero when idle)
 - **Max instances:** 10
 - **Timeout:** 300s
-- **Port:** 3000 (frontend), 8080 (backend)
+- **Port:** 3000 (frontend), 9000 (backend)
 
 ### Cost Estimate
 
@@ -364,7 +474,7 @@ gcloud run deploy flip-fullstack-test-backend \
   --source . \
   --region=asia-southeast1 \
   --allow-unauthenticated \
-  --port=8080
+  --port=9000
 ```
 
 ### Frontend

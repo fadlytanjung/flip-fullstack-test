@@ -1,3 +1,3 @@
 export { DashboardView } from './DashboardView';
-export type { Transaction } from './mockApi';
+export type { Transaction } from './api';
 

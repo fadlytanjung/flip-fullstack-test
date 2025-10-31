@@ -1,0 +1,10 @@
+all: true
+testonly: false
+inpackage: true
+with-expecter: true
+issue-845-fix: true
+dir: mocks/{{ replaceAll .InterfaceDirRelative "internal" "internal_" }}
+packages:
+    github.com/fadlytanjung/flip-fullstack-test/backend:
+        config:
+            recursive: true
