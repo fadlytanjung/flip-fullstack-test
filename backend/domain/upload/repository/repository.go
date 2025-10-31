@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/fadlytanjung/flip-fullstack-test/backend/domain/transaction/schemas"
+	"github.com/fadlytanjung/flip-fullstack-test/backend/pkg/constants"
 	"github.com/fadlytanjung/flip-fullstack-test/backend/pkg/validator"
 	"github.com/google/uuid"
 )
@@ -38,7 +39,7 @@ func (r *Repository) ParseCSV(ctx context.Context, file io.Reader) ([]schemas.Tr
 	// Read all content from the file
 	content, err := io.ReadAll(file)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %w", err)
+		return nil, fmt.Errorf("%s: %w", constants.MsgFailedToReadFile, err)
 	}
 
 	// Create CSV reader
@@ -56,7 +57,7 @@ func (r *Repository) ParseCSV(ctx context.Context, file io.Reader) ([]schemas.Tr
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("error reading CSV at line %d: %w", lineNum, err)
+			return nil, fmt.Errorf(constants.MsgCSVReadError, lineNum, err)
 		}
 
 		lineNum++
@@ -74,13 +75,13 @@ func (r *Repository) ParseCSV(ctx context.Context, file io.Reader) ([]schemas.Tr
 
 		// Validate and parse record
 		if len(record) < 6 {
-			return nil, fmt.Errorf("invalid CSV format at line %d: expected 6 fields, got %d", lineNum, len(record))
+			return nil, fmt.Errorf(constants.MsgCSVInvalidFormat, lineNum, len(record))
 		}
 
 		// Parse fields
 		timestamp, err := strconv.ParseInt(strings.TrimSpace(record[0]), 10, 64)
 		if err != nil {
-			return nil, fmt.Errorf("invalid timestamp at line %d: %w", lineNum, err)
+			return nil, fmt.Errorf(constants.MsgCSVInvalidTimestamp, lineNum, err)
 		}
 
 		name := strings.TrimSpace(record[1])
@@ -90,7 +91,7 @@ func (r *Repository) ParseCSV(ctx context.Context, file io.Reader) ([]schemas.Tr
 		// Parse amount as float to handle decimal values, then convert to int64 (cents)
 		amountFloat, err := strconv.ParseFloat(strings.TrimSpace(record[3]), 64)
 		if err != nil {
-			return nil, fmt.Errorf("invalid amount at line %d: %w", lineNum, err)
+			return nil, fmt.Errorf(constants.MsgCSVInvalidAmount, lineNum, err)
 		}
 		// Convert to cents (multiply by 100 to preserve decimals as integers)
 		amount := int64(amountFloat * 100)
@@ -102,7 +103,7 @@ func (r *Repository) ParseCSV(ctx context.Context, file io.Reader) ([]schemas.Tr
 
 		// Validate transaction type
 		if txType != string(schemas.TypeCredit) && txType != string(schemas.TypeDebit) {
-			return nil, fmt.Errorf("invalid transaction type at line %d: %s (expected CREDIT or DEBIT)", lineNum, txType)
+			return nil, fmt.Errorf(constants.MsgCSVInvalidType, lineNum, txType)
 		}
 
 		// Validate status
@@ -114,7 +115,7 @@ func (r *Repository) ParseCSV(ctx context.Context, file io.Reader) ([]schemas.Tr
 			}
 		}
 		if !validStatus {
-			return nil, fmt.Errorf("invalid status at line %d: %s (expected SUCCESS, FAILED, or PENDING)", lineNum, status)
+			return nil, fmt.Errorf(constants.MsgCSVInvalidStatus, lineNum, status)
 		}
 
 		// Create unique key for duplicate detection
@@ -141,7 +142,7 @@ func (r *Repository) ParseCSV(ctx context.Context, file io.Reader) ([]schemas.Tr
 	}
 
 	if len(transactions) == 0 {
-		return nil, fmt.Errorf("no valid transactions found in CSV")
+		return nil, fmt.Errorf(constants.MsgNoValidTransactions)
 	}
 
 	return transactions, nil
@@ -152,7 +153,7 @@ func (r *Repository) ParseCSVWithValidation(ctx context.Context, file io.Reader,
 	// Read all content from the file
 	content, err := io.ReadAll(file)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %w", err)
+		return nil, fmt.Errorf("%s: %w", constants.MsgFailedToReadFile, err)
 	}
 
 	// Create CSV reader
@@ -170,7 +171,7 @@ func (r *Repository) ParseCSVWithValidation(ctx context.Context, file io.Reader,
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("error reading CSV at line %d: %w", lineNum, err)
+			return nil, fmt.Errorf(constants.MsgCSVReadError, lineNum, err)
 		}
 
 		lineNum++
@@ -188,32 +189,32 @@ func (r *Repository) ParseCSVWithValidation(ctx context.Context, file io.Reader,
 
 		// Validate field count
 		if err := fieldValidator.ValidateFieldCount(record); err != nil {
-			return nil, fmt.Errorf("validation error at line %d: %w", lineNum, err)
+			return nil, fmt.Errorf(constants.MsgCSVValidationError, lineNum, err)
 		}
 
 		// Validate each field using field validator
 		if err := fieldValidator.ValidateTimestamp(record[0]); err != nil {
-			return nil, fmt.Errorf("validation error at line %d (timestamp): %w", lineNum, err)
+			return nil, fmt.Errorf(constants.MsgCSVValidationErrorField, lineNum, "timestamp", err)
 		}
 
 		if err := fieldValidator.ValidateName(record[1]); err != nil {
-			return nil, fmt.Errorf("validation error at line %d (name): %w", lineNum, err)
+			return nil, fmt.Errorf(constants.MsgCSVValidationErrorField, lineNum, "name", err)
 		}
 
 		if err := fieldValidator.ValidateTransactionType(record[2]); err != nil {
-			return nil, fmt.Errorf("validation error at line %d (type): %w", lineNum, err)
+			return nil, fmt.Errorf(constants.MsgCSVValidationErrorField, lineNum, "type", err)
 		}
 
 		if err := fieldValidator.ValidateAmount(record[3]); err != nil {
-			return nil, fmt.Errorf("validation error at line %d (amount): %w", lineNum, err)
+			return nil, fmt.Errorf(constants.MsgCSVValidationErrorField, lineNum, "amount", err)
 		}
 
 		if err := fieldValidator.ValidateStatus(record[4]); err != nil {
-			return nil, fmt.Errorf("validation error at line %d (status): %w", lineNum, err)
+			return nil, fmt.Errorf(constants.MsgCSVValidationErrorField, lineNum, "status", err)
 		}
 
 		if err := fieldValidator.ValidateDescription(record[5]); err != nil {
-			return nil, fmt.Errorf("validation error at line %d (description): %w", lineNum, err)
+			return nil, fmt.Errorf(constants.MsgCSVValidationErrorField, lineNum, "description", err)
 		}
 
 		// Parse fields
@@ -250,7 +251,7 @@ func (r *Repository) ParseCSVWithValidation(ctx context.Context, file io.Reader,
 	}
 
 	if len(transactions) == 0 {
-		return nil, fmt.Errorf("no valid transactions found in CSV")
+		return nil, fmt.Errorf(constants.MsgNoValidTransactions)
 	}
 
 	return transactions, nil

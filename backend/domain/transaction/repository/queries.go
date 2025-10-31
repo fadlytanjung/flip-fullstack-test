@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/fadlytanjung/flip-fullstack-test/backend/domain/transaction/schemas"
+	"github.com/fadlytanjung/flip-fullstack-test/backend/pkg/constants"
 )
 
 // FindByID finds a transaction by its ID
@@ -191,7 +192,7 @@ func (r *Repository) GetIssuesWithFiltersAndSort(
 	}
 
 	return &schemas.IssuesResponse{
-		Message: "Issues retrieved successfully",
+		Message: constants.MsgIssuesRetrieved,
 		Data:    issues,
 		Meta: schemas.ResponseMeta{
 			Pagination: schemas.PaginationMeta{
@@ -349,7 +350,7 @@ func (r *Repository) GetAllWithFiltersAndSort(
 	}
 
 	return &schemas.IssuesResponse{
-		Message: "Transactions retrieved successfully",
+		Message: constants.MsgTransactionsRetrieved,
 		Data:    issues,
 		Meta: schemas.ResponseMeta{
 			Pagination: schemas.PaginationMeta{

@@ -7,6 +7,7 @@ import (
 	"github.com/fadlytanjung/flip-fullstack-test/backend/domain/transaction/repository"
 	"github.com/fadlytanjung/flip-fullstack-test/backend/domain/transaction/schemas"
 	uploadRepo "github.com/fadlytanjung/flip-fullstack-test/backend/domain/upload/repository"
+	"github.com/fadlytanjung/flip-fullstack-test/backend/pkg/constants"
 	"github.com/fadlytanjung/flip-fullstack-test/backend/pkg/validator"
 )
 
@@ -51,7 +52,7 @@ func (uc *UseCase) ParseAndStore(ctx context.Context, file io.Reader) (*schemas.
 	pendingCount, _ := uc.transactionRepo.CountByStatus(ctx, schemas.StatusPending)
 
 	return &schemas.UploadResponse{
-		Message:        "CSV uploaded and processed successfully",
+		Message:        constants.MsgUploadSuccess,
 		TotalRecords:   len(transactions),
 		SuccessRecords: int(successCount),
 		FailedRecords:  int(failedCount),
@@ -79,7 +80,7 @@ func (uc *UseCase) ParseAndStoreWithValidation(ctx context.Context, file io.Read
 	pendingCount, _ := uc.transactionRepo.CountByStatus(ctx, schemas.StatusPending)
 
 	return &schemas.UploadResponse{
-		Message:        "CSV uploaded and processed successfully",
+		Message:        constants.MsgUploadSuccess,
 		TotalRecords:   len(transactions),
 		SuccessRecords: int(successCount),
 		FailedRecords:  int(failedCount),

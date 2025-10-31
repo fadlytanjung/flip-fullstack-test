@@ -15,17 +15,22 @@ Bank Statement Viewer — Go + React/Next.js
 
 ## 📚 Table of Contents
 
-- [Overview](#overview)
-- [Input Format](#input-format)
-- [Requirements](#requirements)
-- [API Contract](#api-contract)
-- [Quick Start](#quick-start)
-- [Development](#development)
-- [Project Structure](#project-structure)
-- [Architecture](#architecture)
-- [Testing](#testing)
-- [Deployment](#deployment)
-- [Documentation](#documentation)
+- [Overview](#-overview)
+- [Input Format](#-input-format)
+- [Requirements](#-requirements)
+- [API Contract](#-api-contract)
+- [Quick Start](#-quick-start)
+- [Environment Variables](#-environment-variables)
+- [Development](#-development)
+- [Project Structure](#-project-structure)
+- [Architecture](#-architecture)
+- [Testing](#-testing)
+- [API Examples](#-api-examples)
+- [Docker](#-docker)
+- [Deployment](#-deployment)
+- [Documentation](#-documentation)
+- [Technologies](#-technologies)
+- [Troubleshooting](#-troubleshooting)
 
 ---
 
@@ -200,7 +205,7 @@ NEXT_PUBLIC_API_URL=https://flip-fullstack-test-backend-xxx.run.app/api
 
 1. **GitHub Secrets** - Store sensitive values:
    ```bash
-   gh secret set NEXT_PUBLIC_API_URL -b "https://your-backend-url.run.app"
+   gh secret set NEXT_PUBLIC_API_URL -b "https://your-backend-url.run.app/api"
    ```
 
 2. **Docker Build** - Injected during image build:
@@ -212,7 +217,7 @@ NEXT_PUBLIC_API_URL=https://flip-fullstack-test-backend-xxx.run.app/api
 3. **Cloud Run Deployment** - Set in service environment:
    ```bash
    gcloud run deploy flip-fullstack-test-frontend \
-     --set-env-vars "NEXT_PUBLIC_API_URL=https://your-backend-url.run.app"
+     --set-env-vars "NEXT_PUBLIC_API_URL=https://your-backend-url.run.app/api"
    ```
 
 **Backend Environment Variable:**
@@ -551,7 +556,6 @@ See [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) for complete guide.
 ### Backend Documentation
 
 - **[backend/README.md](./backend/README.md)** - Architecture, setup, and development guide
-- **[backend/API.md](./backend/API.md)** - Complete API reference with examples
 - **[backend/.env.example](./backend/.env.example)** - Environment configuration template
 
 ### Frontend Documentation

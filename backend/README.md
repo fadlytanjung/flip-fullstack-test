@@ -1,6 +1,6 @@
 # Backend - Flip Bank Statement API
 
-Golang REST API built with Fiber, SQLite, and Domain-Driven Design.
+Golang REST API built with Fiber, SQLite, and Domain-Driven Design with enterprise-grade configuration and logging.
 
 ## 🚀 Quick Start
 
@@ -10,17 +10,61 @@ cd backend
 # Install dependencies & tools
 make install
 
-# Copy environment configuration
-cp .env.example .env
+# Option 1: Run with .env file
+cp .env.example .env  # Create your .env file
+./app
 
-# Run development server (with hot reload)
+# Option 2: Run with environment variables
+PORT=8080 LOG_LEVEL=debug ./app
+
+# Option 3: Run development server (with hot reload)
 air
-
-# Or without hot reload
-make run
 ```
 
-Server runs on: **http://localhost:9000**
+Server runs on: **http://localhost:9000** (or your custom port)
+
+### Environment Configuration
+
+**Configuration Priority (high to low):**
+1. **Environment variables** (highest priority) - Used in production
+2. **`.env` file** - Used for local development
+3. **Default values** (lowest priority) - Fallback for development
+
+**Local Development:**
+```bash
+# Option 1: Create .env file
+cat > .env << EOF
+ENV=development
+PORT=9000
+LOG_LEVEL=debug
+DATABASE_PATH=transactions.db
+CORS_ALLOW_ORIGINS=*
+EOF
+
+# Option 2: Use defaults (no .env needed)
+./app  # Uses concrete defaults from config/defaults.go
+```
+
+**Production Deployment:**
+- Cloud Run automatically provides: `PORT` (injected by platform)
+- GitHub Actions sets: `ENV=production` (always)
+- Other env vars set via `--set-env-vars` in deployment:
+  - `LOG_LEVEL=info`
+  - `DATABASE_PATH=/tmp/transactions.db`
+  - `CORS_ALLOW_ORIGINS=*`
+
+**Available Environment Variables:**
+| Variable | Default (Dev) | Production | Description |
+|----------|---------------|------------|-------------|
+| `ENV` | `development` | `production` | Environment mode (MUST be production in deployment) |
+| `PORT` | `9000` | Auto (Cloud Run) | Server port |
+| `LOG_LEVEL` | `info` | `info` | Logging level: debug/info/warn/error |
+| `DATABASE_PATH` | `transactions.db` | `/tmp/transactions.db` | SQLite database path |
+| `CORS_ALLOW_ORIGINS` | `*` | `*` | CORS allowed origins |
+| `LOG_HOST_IP` | `""` | - | UDP log server IP (optional) |
+| `LOG_HOST_PORT` | `0` | - | UDP log server port (optional) |
+
+See [docs/CONFIG.md](docs/CONFIG.md) for full configuration guide.
 
 ---
 
@@ -35,7 +79,7 @@ Server runs on: **http://localhost:9000**
 | GET    | `/api/issues` | List non-successful transactions |
 | DELETE | `/api/clear` | Clear all data |
 
-**Full API documentation:** See root [README.md](../README.md#-api-contract) or [API.md](./API.md)
+**Full API documentation:** See root [README.md](../README.md#-api-contract)
 
 ### API Features
 
@@ -146,9 +190,9 @@ See `.env.example` for all options.
 
 ## 📖 Additional Resources
 
-- [Full API Reference](./API.md) - Complete endpoint documentation
-- [Root README](../README.md) - Architecture & deployment guide
-- [Makefile Targets](./Makefile) - All available commands
+- [Root README](../README.md) - Full API contract, architecture & deployment guide
+- [Frontend README](../frontend/README.md) - Frontend setup and component guide
+- [Deployment Guide](../docs/DEPLOYMENT.md) - Production deployment instructions
 
 ---
 
@@ -176,4 +220,4 @@ make run
 
 **Happy coding! 🎉**
 
-For questions, see the [root README](../README.md) or full [API documentation](./API.md).
+For questions, see the [root README](../README.md) for full API documentation.

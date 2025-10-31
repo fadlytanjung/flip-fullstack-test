@@ -179,7 +179,7 @@ npm run start
 ```bash
 docker build -t flip-bank-frontend:latest .
 docker run -p 3000:3000 \
-  -e NEXT_PUBLIC_API_URL=https://your-backend-url.run.app \
+  -e NEXT_PUBLIC_API_URL=https://your-backend-url.run.app/api \
   flip-bank-frontend:latest
 ```
 
