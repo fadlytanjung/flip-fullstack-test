@@ -15,7 +15,14 @@ func main() {
 	}
 
 	// Initialize database
-	database := db.New("transactions.db")
+	// Use /tmp for Cloud Run (writable temporary storage)
+	// Use local transactions.db for local development
+	dbPath := "transactions.db"
+	if env := os.Getenv("ENV"); env == "production" {
+		dbPath = "/tmp/transactions.db"
+	}
+	
+	database := db.New(dbPath)
 	defer database.Close()
 
 	// Create Fiber app

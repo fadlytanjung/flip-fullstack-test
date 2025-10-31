@@ -42,6 +42,10 @@ WORKDIR /app
 # Copy binary from builder
 COPY --from=builder --chown=appuser:appuser /build/server .
 
+# Set environment variables
+ENV PORT=9000
+ENV TZ=UTC
+
 # Expose port
 EXPOSE 9000
 
